@@ -6,26 +6,11 @@ import { API, graphqlOperation } from 'aws-amplify'
 
 const getUserAvatar = (gender, name) => `https://avatars.dicebear.com/v2/${gender}/${name}.svg`
 
-const GetName = `
-  query {
-    getName {
-      gender
-      name
-      region
-      surname
-      age
-      phone
-      email
-      photo
-    }
-  }
-`
-
 const createName = (...args) => {
   let userData = null
   if (args) {
-    const info = [,args]
-    userData = info.join()
+    const info = [' ' + args]
+    userData = info.join(" ")
   }
   if (!userData) {
     return `query {
@@ -47,9 +32,6 @@ class App extends Component {
   state = {
     userInfo: {}, userData: [], choices: []
   }
-  // async componentDidMount() {
-  //   this.fetchData()
-  // }
   fetchData = async() => {
     try {
       const userInfo = await API.graphql(graphqlOperation(createName(...this.state.choices)))
@@ -64,9 +46,9 @@ class App extends Component {
   toggleChoice = choice => {
     if (this.state.choices.includes(choice)) {
       const index = this.state.choices.indexOf(choice)
-      const copy = [...this.state.choices]
+      let copy = [...this.state.choices]
       delete copy[index]
-
+      copy = copy.filter(i => i)
       this.setState({ choices: copy  })
     } else {
       const choices = [...this.state.choices, choice]
@@ -84,6 +66,7 @@ class App extends Component {
   }
   render() {
     const { region, name, surname, age, phone, email } = this.state.userInfo
+    console.log('choices:', this.state.choices)
     return (
       <div style={styles.container}>
         {
@@ -110,6 +93,7 @@ class App extends Component {
           )
         }
         <pre>
+          {JSON.stringify(createName(...this.state.choices)).replace(/\\n/g, '')}<br /><br />
           {JSON.stringify(this.state.userInfo, null, 2)}
         </pre>
       </div>
